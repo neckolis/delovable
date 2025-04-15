@@ -30,19 +30,19 @@ npm run build
 node dist/index.js <project-path> [options]
 ```
 
-### Option 2: Install from GitHub (Coming Soon)
+### Option 2: Install from GitHub
 
 ```bash
 npm install -g github:neckolis/delovable
 ```
 
-### Option 3: Using npx with GitHub (Coming Soon)
+### Option 3: Using npx with GitHub
 
 ```bash
 npx github:neckolis/delovable <project-path> [options]
 ```
 
-### Option 4: Global Installation from npm (Not Available Yet)
+### Option 4: Global Installation from npm
 
 ```bash
 npm install -g delovable
@@ -156,23 +156,12 @@ Creates a `netlify.toml` file configured for static site deployment.
 
 ## Troubleshooting
 
-### Error: "delovable is not in this registry"
-
-If you see an error like this:
-
-```
-npm error 404 Not Found - GET https://registry.npmjs.org/delovable - Not found
-npm error 404 'delovable@*' is not in this registry.
-```
-
-This means you're trying to install the package from npm, but it's not published there yet. Use the local installation method described above instead.
-
 ### Error: "Command not found"
 
 If you get a "command not found" error when trying to run `delovable`, make sure you're either:
 
 1. Running it with the full path: `node dist/index.js` from the repository directory
-2. Using it after installing globally from GitHub (once that option is available)
+2. Using it after installing globally: `npm install -g delovable`
 
 ### Other Issues
 
