@@ -1,0 +1,10 @@
+# Cloudflare Pages configuration
+name = "test-project"
+compatibility_date = "2025-04-15"
+
+[build]
+command = "npm run build"
+output_dir = "dist"
+
+[site]
+bucket = "./dist"

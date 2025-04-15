@@ -1,0 +1,33 @@
+{
+  "name": "delovable",
+  "version": "0.1.0",
+  "description": "CLI tool to remove Lovable metadata and prepare apps for deployment",
+  "main": "dist/index.js",
+  "bin": {
+    "delovable": "./dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cli",
+    "lovable",
+    "deployment"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^13.1.0",
+    "fs-extra": "^11.3.0",
+    "globby": "^14.1.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3"
+  }
+}
