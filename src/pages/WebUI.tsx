@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Github, ArrowRight, Loader2, CheckCircle, XCircle, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Github, ArrowRight, Loader2, CheckCircle, XCircle, Download, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +25,13 @@ interface ProcessResult {
   error?: string;
   message?: string;
   logs?: string[];
+  repoUrl?: string; // URL to the newly created GitHub repository
+}
+
+interface GitHubRepoFormData {
+  newRepoName: string;
+  newRepoDescription: string;
+  isPrivate: boolean;
 }
 
 const WebUI = () => {
@@ -38,6 +45,16 @@ const WebUI = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // GitHub repository creation state
+  const [isCreatingRepo, setIsCreatingRepo] = useState(false);
+  const [showRepoDialog, setShowRepoDialog] = useState(false);
+  const [repoFormData, setRepoFormData] = useState<GitHubRepoFormData>({
+    newRepoName: '',
+    newRepoDescription: 'Repository created with Delovable',
+    isPrivate: false
+  });
+  const [repoCreationError, setRepoCreationError] = useState<string | null>(null);
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,23 +194,122 @@ const WebUI = () => {
     return `${API_URL}/api/download/${fileId}`;
   };
 
+  // Handle GitHub repository form input changes
+  const handleRepoFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setRepoFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle checkbox change for private repository
+  const handlePrivateChange = (checked: boolean) => {
+    setRepoFormData(prev => ({ ...prev, isPrivate: checked }));
+  };
+
+  // Handle GitHub repository creation
+  const handleCreateRepo = async () => {
+    setIsCreatingRepo(true);
+    setRepoCreationError(null);
+
+    try {
+      if (!result?.fileId) {
+        throw new Error('No processed repository available');
+      }
+
+      if (!repoFormData.newRepoName) {
+        throw new Error('Repository name is required');
+      }
+
+      // Validate repository name (GitHub requires alphanumeric characters, hyphens, and underscores)
+      if (!/^[a-zA-Z0-9._-]+$/.test(repoFormData.newRepoName)) {
+        throw new Error('Repository name can only contain letters, numbers, hyphens, underscores, and periods');
+      }
+
+      // Call the API to initiate GitHub OAuth
+      const response = await fetch(`${API_URL}/api/github/auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileId: result.fileId,
+          redirectUrl: window.location.href,
+          newRepoName: repoFormData.newRepoName,
+          newRepoDescription: repoFormData.newRepoDescription,
+          isPrivate: repoFormData.isPrivate
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to initiate GitHub OAuth');
+      }
+
+      const data = await response.json();
+
+      if (!data.success || !data.oauthUrl) {
+        throw new Error('Failed to get GitHub OAuth URL');
+      }
+
+      // Redirect to GitHub OAuth
+      window.location.href = data.oauthUrl;
+    } catch (err) {
+      console.error('Error creating GitHub repository:', err);
+      setRepoCreationError(err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setIsCreatingRepo(false);
+    }
+  };
+
+  // Check for GitHub OAuth callback parameters
+  const checkOAuthCallback = () => {
+    const url = new URL(window.location.href);
+    const success = url.searchParams.get('success');
+    const repoUrl = url.searchParams.get('repo_url');
+    const callbackError = url.searchParams.get('error');
+
+    if (success === 'true' && repoUrl) {
+      // Update result with repository URL
+      setResult(prev => prev ? { ...prev, repoUrl } : null);
+
+      // Clean up URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (success === 'false' && callbackError) {
+      // Show error
+      setRepoCreationError(decodeURIComponent(callbackError));
+
+      // Clean up URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  };
+
+  // Check for OAuth callback on component mount
+  useEffect(() => {
+    checkOAuthCallback();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-secondary/95">
       <div className="container mx-auto px-4 py-20">
         <header className="flex justify-between items-center mb-20">
-          <div className="flex items-center gap-4">
+          <a href="/" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
             <BrokenHeartLogo />
             <h1 className="text-white/90 font-mono text-xl">delovable</h1>
-          </div>
-          <a
-            href="https://github.com/neckolis/delovable"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-          >
-            <Github className="w-5 h-5" />
-            <span>GitHub</span>
           </a>
+          <div className="relative group">
+            <a
+              href="https://github.com/neckolis/delovable"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+            >
+              <Github className="w-5 h-5" />
+              <span>GitHub</span>
+              <span className="ml-1 bg-yellow-500/20 text-yellow-300 text-xs px-1.5 py-0.5 rounded-full font-medium">★ Star</span>
+            </a>
+            <div className="absolute right-0 top-full mt-2 w-48 p-2 bg-black/80 backdrop-blur-md rounded-md text-xs text-white/90 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              If you like this tool, please consider giving us a star on GitHub!
+            </div>
+          </div>
         </header>
 
         <main className="max-w-4xl mx-auto">
@@ -364,28 +480,150 @@ const WebUI = () => {
 
               {result.success && result.fileId && (
                 <CardFooter className="flex flex-col gap-4">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => window.location.href = getDownloadUrl(result.fileId!)}
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Cleaned Repository
-                  </Button>
+                  {result.repoUrl ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => window.open(result.repoUrl!, '_blank')}
+                      >
+                        <Github className="mr-2 h-4 w-4" />
+                        View GitHub Repository
+                      </Button>
 
-                  <div className="text-sm text-white/70">
-                    <p>Your repository has been cleaned and is ready for deployment.</p>
-                    <p className="mt-2">The download contains all the files from your repository with Lovable metadata removed.</p>
-                  </div>
+                      <div className="text-sm text-white/70">
+                        <p>Your repository has been created on GitHub and is ready to use.</p>
+                        <p className="mt-2">The repository contains all the files from your original repository with Lovable metadata removed.</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-col sm:flex-row gap-2 w-full">
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => window.location.href = getDownloadUrl(result.fileId!)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          Download Cleaned Repository
+                        </Button>
+
+                        <Dialog open={showRepoDialog} onOpenChange={setShowRepoDialog}>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex-1"
+                            >
+                              <GitBranch className="mr-2 h-4 w-4" />
+                              Create GitHub Repository
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-secondary/95 backdrop-blur-md border-white/10 text-white">
+                            <DialogHeader>
+                              <DialogTitle>Create GitHub Repository</DialogTitle>
+                              <DialogDescription className="text-white/70">
+                                Create a new GitHub repository with your cleaned code.
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            {repoCreationError && (
+                              <Alert variant="destructive" className="bg-red-950/20 backdrop-blur-sm border-white/10">
+                                <XCircle className="h-4 w-4 mr-2" />
+                                <AlertDescription>{repoCreationError}</AlertDescription>
+                              </Alert>
+                            )}
+
+                            <div className="space-y-4 py-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="newRepoName">Repository Name</Label>
+                                <Input
+                                  id="newRepoName"
+                                  name="newRepoName"
+                                  value={repoFormData.newRepoName}
+                                  onChange={handleRepoFormChange}
+                                  placeholder="my-cleaned-repo"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                                  disabled={isCreatingRepo}
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label htmlFor="newRepoDescription">Description (optional)</Label>
+                                <Textarea
+                                  id="newRepoDescription"
+                                  name="newRepoDescription"
+                                  value={repoFormData.newRepoDescription}
+                                  onChange={handleRepoFormChange}
+                                  placeholder="Repository created with Delovable"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                                  disabled={isCreatingRepo}
+                                />
+                              </div>
+
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="isPrivate"
+                                  checked={repoFormData.isPrivate}
+                                  onCheckedChange={handlePrivateChange}
+                                  disabled={isCreatingRepo}
+                                />
+                                <Label htmlFor="isPrivate" className="cursor-pointer">Make repository private</Label>
+                              </div>
+                            </div>
+
+                            <DialogFooter>
+                              <Button
+                                variant="outline"
+                                onClick={() => setShowRepoDialog(false)}
+                                disabled={isCreatingRepo}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleCreateRepo}
+                                disabled={isCreatingRepo}
+                              >
+                                {isCreatingRepo ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Creating...
+                                  </>
+                                ) : (
+                                  <>Create Repository</>
+                                )}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+
+                      <div className="text-sm text-white/70">
+                        <p>Your repository has been cleaned and is ready for deployment.</p>
+                        <p className="mt-2">You can download the files or create a new GitHub repository with the cleaned code.</p>
+                      </div>
+                    </>
+                  )}
                 </CardFooter>
               )}
             </Card>
           )}
 
           <div className="text-center text-white/60 text-sm mt-12">
-            <p>
+            <p className="mb-2">
               This web UI uses Cloudflare Workers and R2 storage to process repositories.
               For more advanced usage, consider using the CLI version.
+            </p>
+            <p>
+              If you find this tool useful, please
+              <a
+                href="https://github.com/neckolis/delovable"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-yellow-300 hover:underline inline-flex items-center"
+              >
+                <span> star us on GitHub</span>
+                <span className="ml-1">★</span>
+              </a>
             </p>
           </div>
         </main>

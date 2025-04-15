@@ -5,9 +5,10 @@
  * It provides an API endpoint to clean Lovable metadata from GitHub repositories.
  */
 
-import { Env } from './types';
+import { Env, GitHubAuthState } from './types';
 import { handleCORS, createCORSHeaders } from './cors';
 import { processRepository } from './repository';
+import { generateOAuthUrl, handleOAuthCallback } from './github';
 
 // Helper function to log request details
 function logRequest(request: Request, url: URL) {
@@ -141,6 +142,79 @@ export default {
             ...corsHeaders
           }
         });
+      }
+
+      // Handle GitHub OAuth initiation
+      if (url.pathname === '/api/github/auth' && request.method === 'POST') {
+        console.log('GitHub OAuth initiation request received');
+
+        try {
+          const data = await request.json();
+          console.log('Request body:', data);
+
+          if (!data.fileId || !data.redirectUrl || !data.newRepoName) {
+            return new Response(JSON.stringify({
+              success: false,
+              error: 'Missing required parameters'
+            }), {
+              status: 400,
+              headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders
+              }
+            });
+          }
+
+          // Create state object
+          const state: GitHubAuthState = {
+            redirectUrl: data.redirectUrl,
+            originalFileId: data.fileId,
+            newRepoName: data.newRepoName,
+            newRepoDescription: data.newRepoDescription,
+            isPrivate: data.isPrivate === true
+          };
+
+          // Encode state as base64
+          const stateParam = btoa(JSON.stringify(state));
+
+          // Generate OAuth URL
+          const oauthUrl = generateOAuthUrl(
+            env.GITHUB_CLIENT_ID,
+            stateParam,
+            `${url.origin}/api/github/callback`
+          );
+
+          return new Response(JSON.stringify({
+            success: true,
+            oauthUrl
+          }), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders
+            }
+          });
+        } catch (error) {
+          console.error('Error initiating GitHub OAuth:', error);
+
+          return new Response(JSON.stringify({
+            success: false,
+            error: 'Failed to initiate GitHub OAuth',
+            message: error instanceof Error ? error.message : 'Unknown error'
+          }), {
+            status: 500,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders
+            }
+          });
+        }
+      }
+
+      // Handle GitHub OAuth callback
+      if (url.pathname === '/api/github/callback' && request.method === 'GET') {
+        console.log('GitHub OAuth callback received');
+        return handleOAuthCallback(request, env);
       }
 
       // Catch-all for unhandled routes
