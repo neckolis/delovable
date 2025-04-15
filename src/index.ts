@@ -202,7 +202,7 @@ async function cleanPackageJson(projectPath: string, verbose: boolean) {
     const pkg = await fs.readJSON(packageJsonPath);
     let modified = false;
 
-    // Remove Lovable dependencies
+    // Remove Lovable dependencies from dependencies section
     if (pkg.dependencies) {
       for (const dep of LOVABLE_METADATA.dependencies) {
         if (pkg.dependencies[dep]) {
@@ -210,6 +210,19 @@ async function cleanPackageJson(projectPath: string, verbose: boolean) {
           modified = true;
           if (verbose) {
             console.log(`  - Removed dependency: ${dep}`);
+          }
+        }
+      }
+    }
+
+    // Remove Lovable dependencies from devDependencies section
+    if (pkg.devDependencies) {
+      for (const dep of LOVABLE_METADATA.dependencies) {
+        if (pkg.devDependencies[dep]) {
+          delete pkg.devDependencies[dep];
+          modified = true;
+          if (verbose) {
+            console.log(`  - Removed devDependency: ${dep}`);
           }
         }
       }
