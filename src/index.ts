@@ -5,16 +5,27 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { globby } from 'globby';
+import fetch from 'node-fetch';
+import tmp from 'tmp';
+import { promisify } from 'util';
+import { exec } from 'child_process';
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Promisify exec for async/await usage
+const execAsync = promisify(exec);
+
+// Create a temporary directory that cleans itself up
+tmp.setGracefulCleanup();
 
 // Define interfaces
 interface DelovableConfig {
   targetPlatform: 'cloudflare' | 'vercel' | 'netlify' | 'none';
   projectPath: string;
   verbose: boolean;
+  isTemporary?: boolean;
 }
 
 interface LovableMetadata {
@@ -48,6 +59,95 @@ const LOVABLE_METADATA: LovableMetadata = {
     /<meta[^>]*property="lovable:[^"]*"[^>]*>/g
   ]
 };
+
+/**
+ * Check if the input is a URL or a local path
+ */
+function isUrl(input: string): boolean {
+  try {
+    new URL(input);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Check if the input is a GitHub URL
+ */
+function isGitHubUrl(input: string): boolean {
+  try {
+    const url = new URL(input);
+    return url.hostname === 'github.com' ||
+           url.hostname === 'www.github.com' ||
+           url.hostname.endsWith('.github.io');
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Extract repository information from GitHub URL
+ */
+function extractRepoInfo(url: string): { owner: string; repo: string } {
+  try {
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/').filter(part => part.length > 0);
+
+    if (pathParts.length >= 2) {
+      return {
+        owner: pathParts[0],
+        repo: pathParts[1].replace('.git', '')
+      };
+    }
+
+    throw new Error('Invalid GitHub repository URL format');
+  } catch (error) {
+    throw new Error('Could not extract repository information from URL');
+  }
+}
+
+/**
+ * Clone a GitHub repository
+ */
+async function cloneGitHubRepo(url: string, verbose: boolean): Promise<string> {
+  if (verbose) {
+    console.log(`🌐 Cloning repository from ${url}...`);
+  }
+
+  try {
+    // Extract repository information
+    const repoInfo = extractRepoInfo(url);
+
+    if (verbose) {
+      console.log(`📦 Found repository: ${repoInfo.owner}/${repoInfo.repo}`);
+    }
+
+    // Create a temporary directory
+    const tmpDir = tmp.dirSync({ unsafeCleanup: true });
+
+    if (verbose) {
+      console.log(`📂 Created temporary directory: ${tmpDir.name}`);
+    }
+
+    // Clone the repository
+    if (verbose) {
+      console.log(`🔄 Cloning repository to temporary directory...`);
+    }
+
+    await execAsync(`git clone ${url} ${tmpDir.name}`);
+
+    if (verbose) {
+      console.log('✅ Repository cloned successfully');
+    }
+
+    return tmpDir.name;
+  } catch (error) {
+    console.error('Error cloning repository:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to clone repository: ${errorMessage}`);
+  }
+}
 
 /**
  * Main function to remove Lovable metadata from a project
@@ -365,20 +465,59 @@ program
   .name('delovable')
   .description('Remove Lovable metadata and prepare for deployment')
   .version('0.1.0')
-  .argument('<project-path>', 'Path to your Lovable project')
+  .argument('<project-source>', 'Path to your Lovable project or GitHub repository URL')
   .option('-p, --platform <platform>', 'Target platform (cloudflare, vercel, netlify, none)', 'none')
   .option('-v, --verbose', 'Enable verbose output', false)
-  .action(async (projectPath, options) => {
+  .option('-o, --output <output-dir>', 'Output directory for repository-based projects')
+  .action(async (projectSource, options) => {
     try {
-      const resolvedPath = path.resolve(projectPath);
+      let projectPath: string;
+      let isTemporary = false;
 
+      // Check if the input is a URL
+      if (isUrl(projectSource)) {
+        if (!isGitHubUrl(projectSource)) {
+          throw new Error('Only GitHub repository URLs are supported');
+        }
+
+        // Clone the repository
+        projectPath = await cloneGitHubRepo(projectSource, options.verbose);
+        isTemporary = true;
+
+        if (options.verbose) {
+          console.log(`🔄 Processing cloned repository at: ${projectPath}`);
+        }
+      } else {
+        // It's a local path
+        projectPath = path.resolve(projectSource);
+      }
+
+      // Process the project
       await removeLovableMetadata({
-        projectPath: resolvedPath,
+        projectPath,
         targetPlatform: options.platform,
-        verbose: options.verbose
+        verbose: options.verbose,
+        isTemporary
       });
 
       console.log('✅ Successfully removed Lovable metadata');
+
+      // If it's a URL-based project and an output directory is specified, copy the cleaned project there
+      if (isTemporary && options.output) {
+        const outputDir = path.resolve(options.output);
+
+        if (options.verbose) {
+          console.log(`📋 Copying cleaned project to: ${outputDir}`);
+        }
+
+        // Create the output directory if it doesn't exist
+        await fs.ensureDir(outputDir);
+
+        // Copy the cleaned project to the output directory
+        await fs.copy(projectPath, outputDir);
+
+        console.log(`📁 Project saved to: ${outputDir}`);
+      }
 
       if (options.platform !== 'none') {
         console.log(`🚀 Project is now ready for deployment to ${options.platform}`);

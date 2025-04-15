@@ -51,26 +51,35 @@ npm install -g delovable
 ## Usage
 
 ```bash
-delovable <project-path> [options]
+delovable <project-source> [options]
 ```
 
 ### Arguments
 
-- `project-path`: Path to your Lovable project (required)
+- `project-source`: Path to your Lovable project or GitHub repository URL (required)
+  - Local path: `delovable ./my-lovable-project`
+  - GitHub URL: `delovable https://github.com/username/lovable-project`
 
 ### Options
 
 - `-p, --platform <platform>`: Target deployment platform (cloudflare, vercel, netlify, none) (default: "none")
 - `-v, --verbose`: Enable verbose output
+- `-o, --output <output-dir>`: Output directory for repository-based projects
 - `--version`: Show version number
 - `-h, --help`: Display help
 
 ### Examples
 
-Remove Lovable metadata from a project:
+Remove Lovable metadata from a local project:
 
 ```bash
 delovable ./my-lovable-project
+```
+
+Remove Lovable metadata from a GitHub repository and save to an output directory:
+
+```bash
+delovable https://github.com/username/lovable-project --output ./cleaned-project
 ```
 
 Remove Lovable metadata and prepare for Cloudflare Pages deployment:
@@ -79,10 +88,10 @@ Remove Lovable metadata and prepare for Cloudflare Pages deployment:
 delovable ./my-lovable-project --platform cloudflare
 ```
 
-Remove Lovable metadata with verbose output:
+Process a GitHub repository, prepare for Vercel deployment, and save with verbose output:
 
 ```bash
-delovable ./my-lovable-project --verbose
+delovable https://github.com/username/lovable-project --platform vercel --output ./cleaned-project --verbose
 ```
 
 ## Step-by-Step Guide
@@ -111,8 +120,11 @@ npm run build
 ### 4. Run Delovable on Your Project
 
 ```bash
-# Basic usage
+# Basic usage with local project
 node dist/index.js /path/to/your/lovable-project
+
+# With GitHub repository
+node dist/index.js https://github.com/username/lovable-project --output ./cleaned-project
 
 # With verbose output
 node dist/index.js /path/to/your/lovable-project --verbose
