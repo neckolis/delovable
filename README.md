@@ -1,6 +1,6 @@
 # Delovable
 
-A CLI tool to remove Lovable metadata and tracking from Lovable projects and prepare them for deployment to various platforms.
+A tool to remove Lovable metadata and tracking from Lovable projects and prepare them for deployment to various platforms. Available as both a CLI tool and a web UI.
 
 ## Features
 
@@ -10,6 +10,7 @@ A CLI tool to remove Lovable metadata and tracking from Lovable projects and pre
   - Cloudflare Pages
   - Vercel
   - Netlify
+- Available as both a CLI tool and a web-based UI
 
 ## Installation
 
@@ -50,17 +51,29 @@ npm install -g delovable
 
 ## Usage
 
+### CLI Usage
+
 ```bash
 delovable <project-source> [options]
 ```
 
-### Arguments
+#### Arguments
 
 - `project-source`: Path to your Lovable project or GitHub repository URL (required)
   - Local path: `delovable ./my-lovable-project`
   - GitHub URL: `delovable https://github.com/username/lovable-project`
 
-### Options
+### Web UI Usage
+
+You can also use the web-based UI at [https://delovable.pages.dev](https://delovable.pages.dev):
+
+1. Visit the web UI page
+2. Enter your GitHub repository URL
+3. Select your target deployment platform
+4. Click "Process Repository"
+5. Download your cleaned project
+
+#### CLI Options
 
 - `-p, --platform <platform>`: Target deployment platform (cloudflare, vercel, netlify, none) (default: "none")
 - `-v, --verbose`: Enable verbose output
@@ -175,6 +188,14 @@ If you get a "command not found" error when trying to run `delovable`, make sure
 1. Running it with the full path: `node dist/index.js` from the repository directory
 2. Using it after installing globally: `npm install -g delovable`
 
+### Web UI Issues
+
+If you encounter issues with the web UI:
+
+1. Make sure you're using a valid GitHub repository URL
+2. Check that the repository is public and accessible
+3. Try using a different browser or clearing your cache
+
 ### Other Issues
 
 If you encounter any other issues:
@@ -182,6 +203,35 @@ If you encounter any other issues:
 1. Make sure you're using the latest version by pulling from the repository
 2. Try running with the `--verbose` flag to get more detailed output
 3. Open an issue on the [GitHub repository](https://github.com/neckolis/delovable/issues)
+
+## Development
+
+### Running the Web UI Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/neckolis/delovable.git
+cd delovable
+
+# Install dependencies
+npm install
+
+# Start the web UI development server
+npm run dev:web
+
+# In a separate terminal, start the worker
+npm run worker:dev
+```
+
+### Deploying the Web UI
+
+```bash
+# Deploy the web UI to Cloudflare Pages
+npm run pages:deploy
+
+# Deploy the worker to Cloudflare Workers
+npm run worker:deploy
+```
 
 ## License
 

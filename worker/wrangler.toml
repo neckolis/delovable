@@ -1,0 +1,19 @@
+name = "delovable-worker"
+main = "src/index.ts"
+compatibility_date = "2024-04-15"
+
+# Configure R2 bucket for temporary storage
+[[r2_buckets]]
+binding = "DELOVABLE_BUCKET"
+bucket_name = "delovable-temp"
+preview_bucket_name = "delovable-temp-dev"
+
+# Environment variables
+[vars]
+WORKER_ENV = "production"
+
+# Development environment
+[env.development]
+name = "delovable-worker-dev"
+[env.development.vars]
+WORKER_ENV = "development"

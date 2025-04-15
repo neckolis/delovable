@@ -4,6 +4,13 @@ node_modules/
 # Build output
 dist/
 build/
+worker/dist/
+.wrangler/
+
+# Test directories
+cleaned-heartbreak/
+cleaned-heartbreak-fixed/
+output-project/
 
 # Environment variables
 .env
