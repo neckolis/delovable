@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 // Define the API URL based on the environment
 const API_URL = import.meta.env.PROD
-  ? 'https://delovable.workers.dev'
+  ? 'https://delovable.delovable.workers.dev'
   : 'http://localhost:8787';
 
 // Define the types for our form and API responses
