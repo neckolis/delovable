@@ -12,15 +12,17 @@ preview_bucket_name = "delovable-temp-dev"
 [vars]
 WORKER_ENV = "production"
 
-# GitHub OAuth credentials (these are placeholders, set real values in the dashboard)
-GITHUB_CLIENT_ID = "your-github-client-id"
-GITHUB_CLIENT_SECRET = "your-github-client-secret"
+# GitHub OAuth credentials (these are set in the Cloudflare dashboard)
+# GITHUB_CLIENT_ID = "your-github-client-id"
+# GITHUB_CLIENT_SECRET = "your-github-client-secret"
 
 # Development environment
 [env.development]
-name = "delovable-worker-dev"
+name = "delovable-dev"
 [env.development.vars]
 WORKER_ENV = "development"
+# GITHUB_CLIENT_ID = "your-github-client-id"
+# GITHUB_CLIENT_SECRET = "your-github-client-secret"
 
 # Enable logs
 [observability.logs]

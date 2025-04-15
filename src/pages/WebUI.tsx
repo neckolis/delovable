@@ -262,23 +262,39 @@ const WebUI = () => {
 
   // Check for GitHub OAuth callback parameters
   const checkOAuthCallback = () => {
-    const url = new URL(window.location.href);
-    const success = url.searchParams.get('success');
-    const repoUrl = url.searchParams.get('repo_url');
-    const callbackError = url.searchParams.get('error');
+    try {
+      const url = new URL(window.location.href);
+      const success = url.searchParams.get('success');
+      const repoUrl = url.searchParams.get('repo_url');
+      const callbackError = url.searchParams.get('error');
 
-    if (success === 'true' && repoUrl) {
-      // Update result with repository URL
-      setResult(prev => prev ? { ...prev, repoUrl } : null);
+      console.log('Checking OAuth callback parameters:', { success, repoUrl, callbackError });
 
-      // Clean up URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (success === 'false' && callbackError) {
-      // Show error
-      setRepoCreationError(decodeURIComponent(callbackError));
+      if (success === 'true' && repoUrl) {
+        console.log('GitHub repository created successfully:', repoUrl);
+        // Update result with repository URL
+        setResult(prev => prev ? { ...prev, repoUrl } : {
+          success: true,
+          message: 'Repository created successfully',
+          repoUrl,
+          logs: ['Repository created on GitHub']
+        });
 
-      // Clean up URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
+        // Show repo dialog if it was open
+        setShowRepoDialog(false);
+
+        // Clean up URL parameters
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (success === 'false' && callbackError) {
+        console.error('GitHub repository creation failed:', callbackError);
+        // Show error
+        setRepoCreationError(decodeURIComponent(callbackError));
+
+        // Clean up URL parameters
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch (error) {
+      console.error('Error checking OAuth callback:', error);
     }
   };
 

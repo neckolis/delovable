@@ -15,6 +15,10 @@ pages_build_output_dir = "dist/web"
 [site]
 basePath = "/"
 
+# Branch configuration
+[env.feature-github-repo-creation]
+name = "feature-github-repo-creation"
+
 # Environment variables
 [vars]
 NODE_VERSION = "18"
