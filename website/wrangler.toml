@@ -1,6 +1,7 @@
 # Cloudflare Pages configuration
 name = "delovable"
 compatibility_date = "2025-04-15"
+pages_build_output_dir = "dist"
 
 [build]
 command = "npm run build"
