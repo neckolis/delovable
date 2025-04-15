@@ -1,0 +1,10 @@
+{
+  "rules": [
+    {
+      "AllowedOrigins": ["*"],
+      "AllowedMethods": ["GET", "PUT", "POST", "DELETE"],
+      "AllowedHeaders": ["*"],
+      "MaxAgeSeconds": 3600
+    }
+  ]
+}

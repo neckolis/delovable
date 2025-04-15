@@ -17,3 +17,7 @@ WORKER_ENV = "production"
 name = "delovable-worker-dev"
 [env.development.vars]
 WORKER_ENV = "development"
+
+# Enable logs
+[observability.logs]
+enabled = true

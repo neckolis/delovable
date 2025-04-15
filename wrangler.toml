@@ -7,7 +7,13 @@ compatibility_date = "2024-04-15"
 [build]
 command = "npm run build:web"
 upload.format = "directory"
-output_dir = "dist/web"
+
+# Pages configuration
+pages_build_output_dir = "dist/web"
+
+# Asset configuration
+[site]
+basePath = "/"
 
 # Environment variables
 [vars]
