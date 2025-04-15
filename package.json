@@ -4,7 +4,7 @@
   "description": "CLI tool to remove Lovable metadata and prepare apps for deployment",
   "main": "dist/index.js",
   "bin": {
-    "delovable": "./dist/index.js"
+    "delovable": "dist/index.js"
   },
   "type": "module",
   "files": [
@@ -32,7 +32,7 @@
   "author": "neckolis",
   "repository": {
     "type": "git",
-    "url": "https://github.com/neckolis/delovable.git"
+    "url": "git+https://github.com/neckolis/delovable.git"
   },
   "bugs": {
     "url": "https://github.com/neckolis/delovable/issues"
@@ -40,9 +40,13 @@
   "homepage": "https://github.com/neckolis/delovable",
   "license": "MIT",
   "dependencies": {
+    "@types/node-fetch": "^2.6.12",
+    "@types/tmp": "^0.2.6",
     "commander": "^13.1.0",
     "fs-extra": "^11.3.0",
-    "globby": "^14.1.0"
+    "globby": "^14.1.0",
+    "node-fetch": "^2.7.0",
+    "tmp": "^0.2.3"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
