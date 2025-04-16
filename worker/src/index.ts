@@ -10,6 +10,9 @@ import { handleCORS, createCORSHeaders } from './cors';
 import { processRepository } from './repository';
 import { generateOAuthUrl, handleOAuthCallback } from './github';
 
+// Import debug HTML
+import debugHtml from './debug.html';
+
 // Helper function to log request details
 function logRequest(request: Request, url: URL) {
   console.log('Request method:', request.method);
@@ -153,6 +156,11 @@ export default {
           console.log('Request body:', data);
 
           if (!data.fileId || !data.redirectUrl || !data.newRepoName) {
+            console.error('Missing required parameters:', {
+              fileId: !!data.fileId,
+              redirectUrl: !!data.redirectUrl,
+              newRepoName: !!data.newRepoName
+            });
             return new Response(JSON.stringify({
               success: false,
               error: 'Missing required parameters'
@@ -174,8 +182,31 @@ export default {
             isPrivate: data.isPrivate === true
           };
 
+          console.log('Created state object:', {
+            redirectUrl: state.redirectUrl,
+            originalFileId: state.originalFileId,
+            newRepoName: state.newRepoName,
+            isPrivate: state.isPrivate
+          });
+
           // Encode state as base64
           const stateParam = btoa(JSON.stringify(state));
+          console.log('State parameter encoded successfully');
+
+          // Check if GitHub client ID is available
+          if (!env.GITHUB_CLIENT_ID) {
+            console.error('GitHub client ID is not configured');
+            return new Response(JSON.stringify({
+              success: false,
+              error: 'GitHub OAuth is not properly configured'
+            }), {
+              status: 500,
+              headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders
+              }
+            });
+          }
 
           // Generate OAuth URL
           const oauthUrl = generateOAuthUrl(
@@ -183,6 +214,8 @@ export default {
             stateParam,
             `${url.origin}/api/github/callback`
           );
+
+          console.log('Generated OAuth URL (redacted):', oauthUrl.replace(env.GITHUB_CLIENT_ID, '[REDACTED]'));
 
           return new Response(JSON.stringify({
             success: true,
@@ -215,6 +248,79 @@ export default {
       if (url.pathname === '/api/github/callback' && request.method === 'GET') {
         console.log('GitHub OAuth callback received');
         return handleOAuthCallback(request, env);
+      }
+
+      // Debug page for OAuth testing
+      if (url.pathname === '/debug') {
+        console.log('Serving debug page');
+        return new Response(debugHtml, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/html',
+            ...corsHeaders
+          }
+        });
+      }
+
+      // Token proxy endpoint to avoid CORS issues
+      if (url.pathname === '/api/github/token-proxy' && request.method === 'POST') {
+        console.log('Token proxy request received');
+
+        try {
+          // Get the form data from the request
+          const contentType = request.headers.get('Content-Type') || '';
+          let params: URLSearchParams;
+
+          if (contentType.includes('application/x-www-form-urlencoded')) {
+            // If it's URL-encoded form data, parse it directly
+            const text = await request.text();
+            params = new URLSearchParams(text);
+          } else if (contentType.includes('multipart/form-data')) {
+            // If it's multipart form data, use formData()
+            const formData = await request.formData();
+            params = new URLSearchParams();
+
+            for (const [key, value] of formData.entries()) {
+              params.append(key, value.toString());
+            }
+          } else {
+            // Default fallback
+            const text = await request.text();
+            params = new URLSearchParams(text);
+          }
+
+          // Forward the request to GitHub
+          const response = await fetch('https://github.com/login/oauth/access_token', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'User-Agent': 'Delovable-OAuth-App'
+            },
+            body: params.toString()
+          });
+
+          // Get the response as text
+          const responseText = await response.text();
+
+          // Return the response to the client
+          return new Response(responseText, {
+            status: response.status,
+            headers: {
+              'Content-Type': response.headers.get('Content-Type') || 'text/plain',
+              ...corsHeaders
+            }
+          });
+        } catch (error) {
+          console.error('Error in token proxy:', error);
+          return new Response(JSON.stringify({ error: 'Failed to proxy token request' }), {
+            status: 500,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders
+            }
+          });
+        }
       }
 
       // Catch-all for unhandled routes

@@ -7,6 +7,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BrokenHeartLogo } from '@/components/BrokenHeartLogo';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 
 // Define the API URL based on the environment
 const API_URL = import.meta.env.PROD
@@ -285,6 +288,9 @@ const WebUI = () => {
 
         // Clean up URL parameters
         window.history.replaceState({}, document.title, window.location.pathname);
+
+        // Open the GitHub repository in a new tab
+        window.open(repoUrl, '_blank');
       } else if (success === 'false' && callbackError) {
         console.error('GitHub repository creation failed:', callbackError);
         // Show error
@@ -304,7 +310,7 @@ const WebUI = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary to-secondary/95">
+    <div className="min-h-screen bg-secondary">
       <div className="container mx-auto px-4 py-20">
         <header className="flex justify-between items-center mb-20">
           <a href="/" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
@@ -396,14 +402,25 @@ const WebUI = () => {
                   </p>
                 </div>
 
-                <div className="bg-white/5 p-4 rounded-md">
-                  <h4 className="text-sm font-medium text-white mb-2">What this tool does:</h4>
-                  <ul className="text-sm text-white/80 space-y-1 list-disc pl-5">
-                    <li>Removes Lovable tracking scripts</li>
-                    <li>Cleans package.json dependencies</li>
-                    <li>Prepares deployment configuration</li>
-                    <li>Packages everything for download</li>
-                  </ul>
+                <div className="space-y-4">
+                  <div className="bg-white/5 p-4 rounded-md">
+                    <h4 className="text-sm font-medium text-white mb-2">What this tool does:</h4>
+                    <ul className="text-sm text-white/80 space-y-1 list-disc pl-5">
+                      <li>Removes Lovable tracking scripts</li>
+                      <li>Cleans package.json dependencies</li>
+                      <li>Prepares deployment configuration</li>
+                      <li>Packages everything for download</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-secondary/50 p-4 rounded-md border border-accent/10">
+                    <h4 className="text-sm font-medium text-white mb-2 flex items-center">
+                      <span className="mr-2 text-primary">✓</span> Privacy Promise
+                    </h4>
+                    <p className="text-sm text-white/80">
+                      We do the loving thing and never track or retain any data. All processed repositories and logs are automatically deleted within 24 hours.
+                    </p>
+                  </div>
                 </div>
 
                 <Button
@@ -429,8 +446,8 @@ const WebUI = () => {
 
           {/* Error message */}
           {error && (
-            <Alert variant="destructive" className="mb-8 bg-red-950/20 backdrop-blur-sm border-white/10">
-              <XCircle className="h-4 w-4 mr-2" />
+            <Alert variant="destructive" className="mb-8 bg-secondary/30 border-primary/20 text-white">
+              <XCircle className="h-4 w-4 mr-2 text-primary" />
               <AlertDescription>
                 {error}
                 {error.includes('private') && (
@@ -451,7 +468,7 @@ const WebUI = () => {
 
           {/* Processing result */}
           {result && (
-            <Card className={`mb-8 ${result.success ? (result.fileId ? 'bg-green-950/20' : 'bg-blue-950/20') : 'bg-red-950/20'} backdrop-blur-sm border-white/10 text-white`}>
+            <Card className={`mb-8 ${result.success ? (result.fileId ? 'bg-secondary/30' : 'bg-secondary/30') : 'bg-secondary/30'} border-accent/10 text-white`}>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   {result.success ? (
@@ -517,7 +534,7 @@ const WebUI = () => {
                       <div className="flex flex-col sm:flex-row gap-2 w-full">
                         <Button
                           variant="outline"
-                          className="flex-1"
+                          className="flex-1 text-white hover:text-white border-white/20 hover:border-white/40 bg-secondary/50 hover:bg-secondary/70"
                           onClick={() => window.location.href = getDownloadUrl(result.fileId!)}
                         >
                           <Download className="mr-2 h-4 w-4" />
@@ -528,7 +545,7 @@ const WebUI = () => {
                           <DialogTrigger asChild>
                             <Button
                               variant="outline"
-                              className="flex-1"
+                              className="flex-1 text-white hover:text-white border-white/20 hover:border-white/40 bg-secondary/50 hover:bg-secondary/70"
                             >
                               <GitBranch className="mr-2 h-4 w-4" />
                               Create GitHub Repository
@@ -592,6 +609,7 @@ const WebUI = () => {
                                 variant="outline"
                                 onClick={() => setShowRepoDialog(false)}
                                 disabled={isCreatingRepo}
+                                className="text-white hover:text-white border-white/20 hover:border-white/40 bg-secondary/50 hover:bg-secondary/70"
                               >
                                 Cancel
                               </Button>
@@ -629,9 +647,12 @@ const WebUI = () => {
               This web UI uses Cloudflare Workers and R2 storage to process repositories.
               For more advanced usage, consider using the CLI version.
             </p>
+            <p className="mb-4">
+              We do the loving thing and never track or retain any data.
+              All data and logs are automatically deleted within 24 hours.
+            </p>
             <p>
-              If you find this tool useful, please
-              <a
+              If you find this tool useful, please <a
                 href="https://github.com/neckolis/delovable"
                 target="_blank"
                 rel="noopener noreferrer"
