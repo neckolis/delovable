@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import WhatsNextModal from '@/components/whats-next/WhatsNextModal';
 
 // Define the API URL based on the environment
 const API_URL = import.meta.env.PROD
@@ -58,6 +59,11 @@ const WebUI = () => {
     isPrivate: false
   });
   const [repoCreationError, setRepoCreationError] = useState<string | null>(null);
+
+  // What's Next modal state
+  const [showWhatsNextModal, setShowWhatsNextModal] = useState(false);
+  const [repositoryOwner, setRepositoryOwner] = useState('');
+  const [repositoryName, setRepositoryName] = useState('');
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,6 +187,23 @@ const WebUI = () => {
 
       console.log('API response data:', data);
       setResult(data);
+
+      // Extract repository owner and name from the URL
+      try {
+        const url = new URL(formData.repositoryUrl);
+        const pathParts = url.pathname.split('/').filter(Boolean);
+        if (pathParts.length >= 2) {
+          setRepositoryOwner(pathParts[0]);
+          setRepositoryName(pathParts[1].replace(/\.git$/, ''));
+
+          // Show the What's Next modal if processing was successful
+          if (data.success && data.fileId) {
+            setShowWhatsNextModal(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error extracting repository info:', error);
+      }
     } catch (err) {
       // Handle errors
       console.error('Processing error:', err);
@@ -665,6 +688,15 @@ const WebUI = () => {
           </div>
         </main>
       </div>
+
+      {/* What's Next Modal */}
+      <WhatsNextModal
+        isOpen={showWhatsNextModal}
+        onClose={() => setShowWhatsNextModal(false)}
+        repositoryUrl={formData.repositoryUrl}
+        repositoryOwner={repositoryOwner}
+        repositoryName={repositoryName}
+      />
     </div>
   );
 };
