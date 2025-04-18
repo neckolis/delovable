@@ -5,6 +5,11 @@ import { Loader2, CheckCircle, Code, GitBranch } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 
+// Define the API URL based on the environment
+const API_URL = import.meta.env.PROD
+  ? 'https://delovable.delovable.workers.dev'
+  : 'http://localhost:8787';
+
 interface WeaviateIntegrationProps {
   repositoryUrl: string;
   repositoryOwner: string;
@@ -28,7 +33,7 @@ export default function WeaviateIntegration({
   useEffect(() => {
     const detectLanguage = async () => {
       try {
-        const response = await fetch(`/api/integrations/weaviate/detect-language`, {
+        const response = await fetch(`${API_URL}/api/integrations/weaviate/detect-language`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -38,9 +43,9 @@ export default function WeaviateIntegration({
             repositoryName,
           }),
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success && data.language) {
           setDetectedLanguage(data.language.toLowerCase());
           setSelectedLanguage(data.language.toLowerCase());
@@ -51,16 +56,16 @@ export default function WeaviateIntegration({
         setIsDetecting(false);
       }
     };
-    
+
     detectLanguage();
   }, [repositoryOwner, repositoryName]);
 
   const handleIntegrate = async () => {
     setIsLoading(true);
     setError('');
-    
+
     try {
-      const response = await fetch('/api/integrations/weaviate/integrate', {
+      const response = await fetch(`${API_URL}/api/integrations/weaviate/integrate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,9 +77,9 @@ export default function WeaviateIntegration({
           language: selectedLanguage,
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setIsIntegrated(true);
         if (data.pullRequestUrl) {
@@ -99,17 +104,17 @@ export default function WeaviateIntegration({
           <p className="text-white/70 mb-4">
             Enhance your project with Weaviate vector database for AI-powered search and recommendations.
           </p>
-          
+
           {error && (
             <div className="bg-red-900/20 text-red-300 p-3 rounded-md mb-4">
               {error}
             </div>
           )}
-          
+
           <div className="space-y-6">
             <div>
               <h4 className="font-medium mb-2">Select your project language:</h4>
-              
+
               {isDetecting ? (
                 <div className="flex items-center text-white/70">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -122,9 +127,9 @@ export default function WeaviateIntegration({
                       <span className="text-green-400">✓</span> Detected language: <span className="font-semibold">{detectedLanguage}</span>
                     </div>
                   )}
-                  
-                  <RadioGroup 
-                    value={selectedLanguage} 
+
+                  <RadioGroup
+                    value={selectedLanguage}
                     onValueChange={setSelectedLanguage}
                     className="space-y-2"
                   >
@@ -144,11 +149,11 @@ export default function WeaviateIntegration({
                 </>
               )}
             </div>
-            
+
             <div>
               {!isIntegrated ? (
-                <Button 
-                  onClick={handleIntegrate} 
+                <Button
+                  onClick={handleIntegrate}
                   disabled={isLoading || isDetecting}
                   className="w-full"
                 >
@@ -162,11 +167,11 @@ export default function WeaviateIntegration({
                     <CheckCircle className="h-5 w-5 mr-2" />
                     <span className="font-semibold">Weaviate integration added!</span>
                   </div>
-                  
+
                   {pullRequestUrl && (
-                    <a 
-                      href={pullRequestUrl} 
-                      target="_blank" 
+                    <a
+                      href={pullRequestUrl}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center text-primary hover:underline mt-2"
                     >

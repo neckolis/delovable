@@ -3,6 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, CheckCircle, ExternalLink } from 'lucide-react';
 
+// Define the API URL based on the environment
+const API_URL = import.meta.env.PROD
+  ? 'https://delovable.delovable.workers.dev'
+  : 'http://localhost:8787';
+
 interface CloudflareIntegrationProps {
   repositoryUrl: string;
   repositoryOwner: string;
@@ -24,10 +29,10 @@ export default function CloudflareIntegration({
   const handleConnect = async () => {
     setIsConnecting(true);
     setError('');
-    
+
     try {
       // Initiate Cloudflare OAuth flow
-      const response = await fetch('/api/integrations/cloudflare/connect', {
+      const response = await fetch(`${API_URL}/api/integrations/cloudflare/connect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,9 +41,9 @@ export default function CloudflareIntegration({
           redirectUrl: window.location.origin + '/web-ui',
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.authUrl) {
         // Redirect to Cloudflare OAuth
         window.location.href = data.authUrl;
@@ -56,9 +61,9 @@ export default function CloudflareIntegration({
   const handleDeploy = async () => {
     setIsDeploying(true);
     setError('');
-    
+
     try {
-      const response = await fetch('/api/integrations/cloudflare/deploy', {
+      const response = await fetch(`${API_URL}/api/integrations/cloudflare/deploy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,9 +74,9 @@ export default function CloudflareIntegration({
           repositoryName,
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setIsDeployed(true);
         setDeploymentUrl(data.deploymentUrl);
@@ -94,13 +99,13 @@ export default function CloudflareIntegration({
           <p className="text-white/70 mb-4">
             Deploy your project to Cloudflare Pages for fast, secure hosting with automatic builds and deployments.
           </p>
-          
+
           {error && (
             <div className="bg-red-900/20 text-red-300 p-3 rounded-md mb-4">
               {error}
             </div>
           )}
-          
+
           <div className="space-y-4">
             <div className="flex items-center">
               <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-3">
@@ -113,8 +118,8 @@ export default function CloudflareIntegration({
               <div className="flex-1">
                 <h4 className="font-medium">Connect your Cloudflare account</h4>
                 {!isConnected && (
-                  <Button 
-                    onClick={handleConnect} 
+                  <Button
+                    onClick={handleConnect}
                     disabled={isConnecting}
                     className="mt-2"
                   >
@@ -124,7 +129,7 @@ export default function CloudflareIntegration({
                 )}
               </div>
             </div>
-            
+
             <div className="flex items-center">
               <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-3">
                 {isDeployed ? (
@@ -136,8 +141,8 @@ export default function CloudflareIntegration({
               <div className="flex-1">
                 <h4 className="font-medium">Deploy your repository</h4>
                 {isConnected && !isDeployed && (
-                  <Button 
-                    onClick={handleDeploy} 
+                  <Button
+                    onClick={handleDeploy}
                     disabled={isDeploying}
                     className="mt-2"
                   >
@@ -145,12 +150,12 @@ export default function CloudflareIntegration({
                     Deploy to Cloudflare Pages
                   </Button>
                 )}
-                
+
                 {isDeployed && deploymentUrl && (
                   <div className="mt-2">
-                    <a 
-                      href={deploymentUrl} 
-                      target="_blank" 
+                    <a
+                      href={deploymentUrl}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline flex items-center"
                     >
