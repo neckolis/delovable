@@ -229,7 +229,6 @@ export async function processRepository(
         `Cloned repository ${repoInfo.owner}/${repoInfo.repo}`,
         'Removed Lovable metadata from package.json',
         'Cleaned HTML files',
-        `Set up deployment configuration for ${targetPlatform}`,
         'Packaged repository for download'
       ]
     };

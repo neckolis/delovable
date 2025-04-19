@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export const UsageInstructions = () => {
   return (
     <div className="text-left bg-accent/10 rounded-lg p-6 border border-accent/10">
-      <h3 className="text-2xl font-bold text-white mb-6 text-center">How to Use</h3>
+      <h3 className="text-2xl font-bold text-white mb-6 text-center">Other Ways to Use</h3>
 
       <Tabs defaultValue="npm" className="w-full">
         <TabsList className="grid grid-cols-4 mb-6 bg-secondary/50">
