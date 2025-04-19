@@ -290,8 +290,15 @@ const Index = () => {
                   </div>
                   <div>
                     <h4 className="text-lg font-semibold mb-1">Push your project to GitHub</h4>
-                    <p className="text-white/80">Publish your project to a public GitHub repository.</p>
-                    <p className="text-white/60 text-sm">(Private repositories aren't supported yet.)</p>
+                    <p className="text-white/80">Publish your project to GitHub and make sure it's set to public.</p>
+                    <p className="text-white/80 mt-1"><strong>How to make a repository public:</strong></p>
+                    <ol className="list-decimal pl-5 mt-1 space-y-1 text-white/80">
+                      <li>Go to your repository on GitHub</li>
+                      <li>Click on "Settings"</li>
+                      <li>Scroll down to the "Danger Zone"</li>
+                      <li>Click "Change visibility"</li>
+                      <li>Select "Make public"</li>
+                    </ol>
                   </div>
                 </div>
               </div>
@@ -374,7 +381,13 @@ const Index = () => {
             </div>
 
             <div className="text-center mt-12" id="start-now-section">
-              <h3 className="text-2xl font-bold text-white mb-6">Start Now</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">Start Now</h3>
+              <div className="bg-primary/10 border border-primary/30 p-4 rounded-lg mb-6 inline-block">
+                <p className="text-white/90 font-medium flex items-center">
+                  <span className="mr-2 text-primary text-xl">⚠️</span>
+                  Important: Make sure your GitHub repository is set to public
+                </p>
+              </div>
             </div>
           </div>
 
