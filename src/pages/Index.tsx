@@ -248,35 +248,133 @@ const Index = () => {
         <main className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Reclaim your code.
+              Take Your Lovable Project to the Next Level
             </h2>
+            <div className="mb-8">
+              <Button
+                className="bg-primary hover:bg-primary/90 text-white text-lg px-6 py-6"
+                onClick={() => document.getElementById('start-now-section')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Start Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
             <p className="text-lg md:text-xl text-white/80 mb-6">
-              Delovable removes all Lovable tracking, metadata, and dependencies from your projects,
-              giving you back full control of your code.
+              Delovable helps you seamlessly transition your Lovable project into a fully independent, clean codebase — ready to grow with the AI coding tools, frameworks, and workflows you choose.
             </p>
-            <p className="text-md text-primary/90 mb-12">
-              Your idea. Your code.
+            <p className="text-lg text-white/80 mb-12">
+              No complicated migration. No leftover dependencies. Just your project, ready for what's next.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left text-white/90 mb-12">
-            <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
-              <h3 className="text-xl font-semibold mb-2 flex items-center">
-                <span className="text-primary mr-2">✓</span> Remove Tracking
-              </h3>
-              <p>Eliminates all Lovable tracking scripts, analytics, and monitoring code that could compromise your privacy</p>
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-white mb-6 text-center">How It Works</h3>
+
+            <div className="space-y-6 text-left text-white/90 mb-8">
+              <div className="p-6 rounded-lg bg-accent/10 border border-accent/10">
+                <div className="flex items-start">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-4 mt-1">
+                    <span className="text-primary font-semibold">1</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold mb-1">Build your project on Lovable.dev</h4>
+                    <p className="text-white/80">Start by creating your project using Lovable as usual.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-lg bg-accent/10 border border-accent/10">
+                <div className="flex items-start">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-4 mt-1">
+                    <span className="text-primary font-semibold">2</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold mb-1">Push your project to GitHub</h4>
+                    <p className="text-white/80">Publish your project to a public GitHub repository.</p>
+                    <p className="text-white/60 text-sm">(Private repositories aren't supported yet.)</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-lg bg-accent/10 border border-accent/10">
+                <div className="flex items-start">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-4 mt-1">
+                    <span className="text-primary font-semibold">3</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold mb-1">Paste your GitHub repo link into Delovable</h4>
+                    <p className="text-white/80">Simply enter the link into our tool (for example: https://github.com/username/project).</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-lg bg-accent/10 border border-accent/10">
+                <div className="flex items-start">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-4 mt-1">
+                    <span className="text-primary font-semibold">4</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold mb-1">We clean and package your project</h4>
+                    <p className="text-white/80">Delovable automatically:</p>
+                    <ul className="list-disc pl-5 mt-2 space-y-1 text-white/80">
+                      <li>Removes Lovable tracking scripts</li>
+                      <li>Cleans Lovable-specific dependencies from your project</li>
+                      <li>Packages your project for easy download</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-lg bg-accent/10 border border-accent/10">
+                <div className="flex items-start">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-4 mt-1">
+                    <span className="text-primary font-semibold">5</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold mb-1">Download your ready-to-code project</h4>
+                    <p className="text-white/80">You'll get a clean .zip file you can extract locally.</p>
+                    <p className="text-white/80">Open it in any code editor or development environment you like — no Lovable dependencies required.</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
-              <h3 className="text-xl font-semibold mb-2 flex items-center">
-                <span className="text-primary mr-2">✓</span> Clean Dependencies
-              </h3>
-              <p>Purges all Lovable-specific dependencies from package.json, giving you a lean, clean codebase that's truly yours</p>
+
+            <div className="mt-12 mb-8">
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">Why Use Delovable?</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left text-white/90">
+                <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
+                  <h3 className="text-xl font-semibold mb-2 flex items-center">
+                    <span className="text-primary mr-2">✓</span> Freedom to Choose Your Tools
+                  </h3>
+                  <p>Use your favorite editors, frameworks, and AI coding assistants — on your terms.</p>
+                </div>
+
+                <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
+                  <h3 className="text-xl font-semibold mb-2 flex items-center">
+                    <span className="text-primary mr-2">✓</span> Cleaner, Leaner Projects
+                  </h3>
+                  <p>No hidden scripts or unnecessary dependencies. Just your code, optimized for the future.</p>
+                </div>
+
+                <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
+                  <h3 className="text-xl font-semibold mb-2 flex items-center">
+                    <span className="text-primary mr-2">✓</span> Simple and Fast
+                  </h3>
+                  <p>One link, one click, ready to download. No technical complexity.</p>
+                </div>
+
+                <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
+                  <h3 className="text-xl font-semibold mb-2 flex items-center">
+                    <span className="text-primary mr-2">✓</span> Respect for Your Work
+                  </h3>
+                  <p>We never track, store, or analyze your project data. All processing is temporary and deleted within 24 hours.</p>
+                </div>
+              </div>
             </div>
-            <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
-              <h3 className="text-xl font-semibold mb-2 flex items-center">
-                <span className="text-primary mr-2">✓</span> Download & Go
-              </h3>
-              <p>Download your cleaned project and start developing locally with your favorite tools and editors</p>
+
+            <div className="text-center mt-12" id="start-now-section">
+              <h3 className="text-2xl font-bold text-white mb-6">Start Now</h3>
             </div>
           </div>
 
@@ -323,7 +421,7 @@ const Index = () => {
                       <span className="mr-2 text-primary">✓</span> Privacy Promise
                     </h4>
                     <p className="text-sm text-white/80">
-                      We do the loving thing and never track or retain any data. All processed repositories and logs are automatically deleted within 24 hours.
+                      All processed repositories and logs are automatically deleted within 24 hours.
                     </p>
                   </div>
                 </div>
@@ -437,7 +535,6 @@ const Index = () => {
 
           <div className="text-center text-white/60 text-sm mt-12 mb-12">
             <p className="mb-4">
-              We do the loving thing and never track or retain any data.
               All data and logs are automatically deleted within 24 hours.
             </p>
             <p>
