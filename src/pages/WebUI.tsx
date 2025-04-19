@@ -526,8 +526,8 @@ const WebUI = () => {
                 <Tabs defaultValue="setup">
                   <TabsList className="grid grid-cols-3 mb-6">
                     <TabsTrigger value="setup">Setup</TabsTrigger>
+                    <TabsTrigger value="ai">AI Coding Tools</TabsTrigger>
                     <TabsTrigger value="editors">Code Editors</TabsTrigger>
-                    <TabsTrigger value="ai">AI Assistants</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="setup" className="space-y-4">
@@ -542,20 +542,31 @@ const WebUI = () => {
                     </div>
 
                     <div className="bg-white/5 p-4 rounded-md">
-                      <h3 className="font-medium mb-2">3. Install dependencies</h3>
-                      <p className="text-white/70 text-sm">Open a terminal in your project folder and run:</p>
-                      <pre className="bg-black/30 p-2 rounded mt-2 text-xs overflow-x-auto">npm install</pre>
-                      <p className="text-white/70 text-sm mt-2">or if you use yarn:</p>
-                      <pre className="bg-black/30 p-2 rounded mt-2 text-xs overflow-x-auto">yarn</pre>
+                      <h3 className="font-medium mb-2">3. Vibe out</h3>
+                      <p className="text-white/70 text-sm">Start coding and enjoy your clean project!</p>
                     </div>
+                  </TabsContent>
 
-                    <div className="bg-white/5 p-4 rounded-md">
-                      <h3 className="font-medium mb-2">4. Start development server</h3>
-                      <p className="text-white/70 text-sm">Run the development server:</p>
-                      <pre className="bg-black/30 p-2 rounded mt-2 text-xs overflow-x-auto">npm run dev</pre>
-                      <p className="text-white/70 text-sm mt-2">or with yarn:</p>
-                      <pre className="bg-black/30 p-2 rounded mt-2 text-xs overflow-x-auto">yarn dev</pre>
-                    </div>
+                  <TabsContent value="ai" className="space-y-4">
+                    <p className="text-white/80 mb-2">These AI coding tools can help you develop your project faster:</p>
+
+                    {aiAssistants.map((assistant) => (
+                      <div key={assistant.name} className="bg-white/5 p-4 rounded-md flex items-start">
+                        <div className="flex-1">
+                          <h3 className="font-medium">{assistant.name}</h3>
+                          <p className="text-white/70 text-sm mt-1">{assistant.description}</p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-4 text-white hover:text-white border-white/20 hover:border-white/40 bg-primary/20"
+                          onClick={() => openExternalUrl(assistant.url)}
+                        >
+                          <Code className="h-4 w-4 mr-2" />
+                          Learn More
+                        </Button>
+                      </div>
+                    ))}
                   </TabsContent>
 
                   <TabsContent value="editors" className="space-y-4">
@@ -570,7 +581,7 @@ const WebUI = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="ml-4 text-white hover:text-white border-white/20 hover:border-white/40"
+                          className="ml-4 text-white hover:text-white border-white/20 hover:border-white/40 bg-primary/20"
                           onClick={() => openExternalUrl(ide.downloadUrl)}
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
@@ -579,33 +590,14 @@ const WebUI = () => {
                       </div>
                     ))}
                   </TabsContent>
-
-                  <TabsContent value="ai" className="space-y-4">
-                    <p className="text-white/80 mb-2">These AI coding assistants can help you develop your project faster:</p>
-
-                    {aiAssistants.map((assistant) => (
-                      <div key={assistant.name} className="bg-white/5 p-4 rounded-md flex items-start">
-                        <div className="flex-1">
-                          <h3 className="font-medium">{assistant.name}</h3>
-                          <p className="text-white/70 text-sm mt-1">{assistant.description}</p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="ml-4 text-white hover:text-white border-white/20 hover:border-white/40"
-                          onClick={() => openExternalUrl(assistant.url)}
-                        >
-                          <Code className="h-4 w-4 mr-2" />
-                          Learn More
-                        </Button>
-                      </div>
-                    ))}
-                  </TabsContent>
                 </Tabs>
               </div>
 
               <div className="mt-6 flex justify-end">
-                <Button onClick={() => setShowInstructionsDialog(false)}>
+                <Button
+                  onClick={() => setShowInstructionsDialog(false)}
+                  className="bg-primary hover:bg-primary/90 text-white"
+                >
                   Got it!
                 </Button>
               </div>
