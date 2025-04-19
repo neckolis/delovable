@@ -12,6 +12,10 @@ export interface Env {
   // GitHub OAuth credentials
   GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
+
+  // Cloudflare OAuth credentials
+  CLOUDFLARE_CLIENT_ID?: string;
+  CLOUDFLARE_CLIENT_SECRET?: string;
 }
 
 export interface ProcessResult {

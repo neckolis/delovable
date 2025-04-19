@@ -9,6 +9,8 @@ import { Env, GitHubAuthState } from './types';
 import { handleCORS, createCORSHeaders } from './cors';
 import { processRepository } from './repository';
 import { generateOAuthUrl, handleOAuthCallback } from './github';
+import { handleCloudflareConnect, handleCloudflareDeploy } from './integrations/cloudflare';
+import { handleWeaviateDetectLanguage, handleWeaviateIntegrate } from './integrations/weaviate';
 
 // Import debug HTML
 import debugHtml from './debug.html';
@@ -260,6 +262,28 @@ export default {
             ...corsHeaders
           }
         });
+      }
+
+      // Handle Cloudflare integration endpoints
+      if (url.pathname === '/api/integrations/cloudflare/connect' && request.method === 'POST') {
+        console.log('Cloudflare connect request received');
+        return handleCloudflareConnect(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/api/integrations/cloudflare/deploy' && request.method === 'POST') {
+        console.log('Cloudflare deploy request received');
+        return handleCloudflareDeploy(request, env, corsHeaders);
+      }
+
+      // Handle Weaviate integration endpoints
+      if (url.pathname === '/api/integrations/weaviate/detect-language' && request.method === 'POST') {
+        console.log('Weaviate detect language request received');
+        return handleWeaviateDetectLanguage(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/api/integrations/weaviate/integrate' && request.method === 'POST') {
+        console.log('Weaviate integrate request received');
+        return handleWeaviateIntegrate(request, env, corsHeaders);
       }
 
       // Token proxy endpoint to avoid CORS issues
