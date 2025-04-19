@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Github, ArrowRight, Loader2, CheckCircle, XCircle, Download, GitBranch } from 'lucide-react';
+import { useState } from 'react';
+import { Github, ArrowRight, Loader2, CheckCircle, XCircle, Download, Code, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,9 +7,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BrokenHeartLogo } from '@/components/BrokenHeartLogo';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Define the API URL based on the environment
 const API_URL = import.meta.env.PROD
@@ -37,6 +36,13 @@ interface GitHubRepoFormData {
   isPrivate: boolean;
 }
 
+interface IDEInfo {
+  name: string;
+  downloadUrl: string;
+  icon: string;
+  description: string;
+}
+
 const WebUI = () => {
   // Form state
   const [formData, setFormData] = useState<FormData>({
@@ -49,7 +55,7 @@ const WebUI = () => {
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // GitHub repository creation state
+  // GitHub repository creation state (keeping for compatibility)
   const [isCreatingRepo, setIsCreatingRepo] = useState(false);
   const [showRepoDialog, setShowRepoDialog] = useState(false);
   const [repoFormData, setRepoFormData] = useState<GitHubRepoFormData>({
@@ -58,6 +64,55 @@ const WebUI = () => {
     isPrivate: false
   });
   const [repoCreationError, setRepoCreationError] = useState<string | null>(null);
+
+  // Post-download dialog state
+  const [showInstructionsDialog, setShowInstructionsDialog] = useState(false);
+
+  // IDE recommendations
+  const ideOptions: IDEInfo[] = [
+    {
+      name: 'VS Code',
+      downloadUrl: 'https://code.visualstudio.com/download',
+      icon: 'vscode',
+      description: 'Popular, free editor with great extension support.'
+    },
+    {
+      name: 'WebStorm',
+      downloadUrl: 'https://www.jetbrains.com/webstorm/download/',
+      icon: 'webstorm',
+      description: 'Powerful IDE for web development (paid, free trial available).'
+    },
+    {
+      name: 'Sublime Text',
+      downloadUrl: 'https://www.sublimetext.com/download',
+      icon: 'sublime',
+      description: 'Fast, lightweight editor with minimal UI.'
+    }
+  ];
+
+  // AI assistant recommendations
+  const aiAssistants = [
+    {
+      name: 'GitHub Copilot',
+      url: 'https://github.com/features/copilot',
+      description: 'AI pair programmer that offers autocomplete-style suggestions.'
+    },
+    {
+      name: 'Cursor',
+      url: 'https://cursor.sh/',
+      description: 'Code editor with AI-powered code completion and chat.'
+    },
+    {
+      name: 'Windsurf',
+      url: 'https://www.windsurf.io/',
+      description: 'AI coding assistant that helps you navigate and understand codebases.'
+    },
+    {
+      name: 'Augment Code',
+      url: 'https://augment.dev/',
+      description: 'AI coding assistant that helps you understand and modify code.'
+    }
+  ];
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,117 +252,21 @@ const WebUI = () => {
     return `${API_URL}/api/download/${fileId}`;
   };
 
-  // Handle GitHub repository form input changes
-  const handleRepoFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setRepoFormData(prev => ({ ...prev, [name]: value }));
+  // Handle download completion
+  const handleDownload = (fileId: string) => {
+    // Navigate to the download URL
+    window.location.href = getDownloadUrl(fileId);
+
+    // Show instructions dialog after a short delay
+    setTimeout(() => {
+      setShowInstructionsDialog(true);
+    }, 1000);
   };
 
-  // Handle checkbox change for private repository
-  const handlePrivateChange = (checked: boolean) => {
-    setRepoFormData(prev => ({ ...prev, isPrivate: checked }));
+  // Open external URL
+  const openExternalUrl = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
-
-  // Handle GitHub repository creation
-  const handleCreateRepo = async () => {
-    setIsCreatingRepo(true);
-    setRepoCreationError(null);
-
-    try {
-      if (!result?.fileId) {
-        throw new Error('No processed repository available');
-      }
-
-      if (!repoFormData.newRepoName) {
-        throw new Error('Repository name is required');
-      }
-
-      // Validate repository name (GitHub requires alphanumeric characters, hyphens, and underscores)
-      if (!/^[a-zA-Z0-9._-]+$/.test(repoFormData.newRepoName)) {
-        throw new Error('Repository name can only contain letters, numbers, hyphens, underscores, and periods');
-      }
-
-      // Call the API to initiate GitHub OAuth
-      const response = await fetch(`${API_URL}/api/github/auth`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fileId: result.fileId,
-          redirectUrl: window.location.href,
-          newRepoName: repoFormData.newRepoName,
-          newRepoDescription: repoFormData.newRepoDescription,
-          isPrivate: repoFormData.isPrivate
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to initiate GitHub OAuth');
-      }
-
-      const data = await response.json();
-
-      if (!data.success || !data.oauthUrl) {
-        throw new Error('Failed to get GitHub OAuth URL');
-      }
-
-      // Redirect to GitHub OAuth
-      window.location.href = data.oauthUrl;
-    } catch (err) {
-      console.error('Error creating GitHub repository:', err);
-      setRepoCreationError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
-      setIsCreatingRepo(false);
-    }
-  };
-
-  // Check for GitHub OAuth callback parameters
-  const checkOAuthCallback = () => {
-    try {
-      const url = new URL(window.location.href);
-      const success = url.searchParams.get('success');
-      const repoUrl = url.searchParams.get('repo_url');
-      const callbackError = url.searchParams.get('error');
-
-      console.log('Checking OAuth callback parameters:', { success, repoUrl, callbackError });
-
-      if (success === 'true' && repoUrl) {
-        console.log('GitHub repository created successfully:', repoUrl);
-        // Update result with repository URL
-        setResult(prev => prev ? { ...prev, repoUrl } : {
-          success: true,
-          message: 'Repository created successfully',
-          repoUrl,
-          logs: ['Repository created on GitHub']
-        });
-
-        // Show repo dialog if it was open
-        setShowRepoDialog(false);
-
-        // Clean up URL parameters
-        window.history.replaceState({}, document.title, window.location.pathname);
-
-        // Open the GitHub repository in a new tab
-        window.open(repoUrl, '_blank');
-      } else if (success === 'false' && callbackError) {
-        console.error('GitHub repository creation failed:', callbackError);
-        // Show error
-        setRepoCreationError(decodeURIComponent(callbackError));
-
-        // Clean up URL parameters
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    } catch (error) {
-      console.error('Error checking OAuth callback:', error);
-    }
-  };
-
-  // Check for OAuth callback on component mount
-  useEffect(() => {
-    checkOAuthCallback();
-  }, []);
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -513,130 +472,18 @@ const WebUI = () => {
 
               {result.success && result.fileId && (
                 <CardFooter className="flex flex-col gap-4">
-                  {result.repoUrl ? (
-                    <>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => window.open(result.repoUrl!, '_blank')}
-                      >
-                        <Github className="mr-2 h-4 w-4" />
-                        View GitHub Repository
-                      </Button>
+                  <Button
+                    className="w-full bg-primary hover:bg-primary/90 text-white"
+                    onClick={() => handleDownload(result.fileId!)}
+                  >
+                    <Download className="mr-2 h-5 w-5" />
+                    Download Cleaned Repository
+                  </Button>
 
-                      <div className="text-sm text-white/70">
-                        <p>Your repository has been created on GitHub and is ready to use.</p>
-                        <p className="mt-2">The repository contains all the files from your original repository with Lovable metadata removed.</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex flex-col sm:flex-row gap-2 w-full">
-                        <Button
-                          variant="outline"
-                          className="flex-1 text-white hover:text-white border-white/20 hover:border-white/40 bg-secondary/50 hover:bg-secondary/70"
-                          onClick={() => window.location.href = getDownloadUrl(result.fileId!)}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Download Cleaned Repository
-                        </Button>
-
-                        <Dialog open={showRepoDialog} onOpenChange={setShowRepoDialog}>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="flex-1 text-white hover:text-white border-white/20 hover:border-white/40 bg-secondary/50 hover:bg-secondary/70"
-                            >
-                              <GitBranch className="mr-2 h-4 w-4" />
-                              Create GitHub Repository
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="bg-secondary/95 backdrop-blur-md border-white/10 text-white">
-                            <DialogHeader>
-                              <DialogTitle>Create GitHub Repository</DialogTitle>
-                              <DialogDescription className="text-white/70">
-                                Create a new GitHub repository with your cleaned code.
-                              </DialogDescription>
-                            </DialogHeader>
-
-                            {repoCreationError && (
-                              <Alert variant="destructive" className="bg-red-950/20 backdrop-blur-sm border-white/10">
-                                <XCircle className="h-4 w-4 mr-2" />
-                                <AlertDescription>{repoCreationError}</AlertDescription>
-                              </Alert>
-                            )}
-
-                            <div className="space-y-4 py-4">
-                              <div className="space-y-2">
-                                <Label htmlFor="newRepoName">Repository Name</Label>
-                                <Input
-                                  id="newRepoName"
-                                  name="newRepoName"
-                                  value={repoFormData.newRepoName}
-                                  onChange={handleRepoFormChange}
-                                  placeholder="my-cleaned-repo"
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                                  disabled={isCreatingRepo}
-                                />
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label htmlFor="newRepoDescription">Description (optional)</Label>
-                                <Textarea
-                                  id="newRepoDescription"
-                                  name="newRepoDescription"
-                                  value={repoFormData.newRepoDescription}
-                                  onChange={handleRepoFormChange}
-                                  placeholder="Repository created with Delovable"
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                                  disabled={isCreatingRepo}
-                                />
-                              </div>
-
-                              <div className="flex items-center space-x-2">
-                                <Checkbox
-                                  id="isPrivate"
-                                  checked={repoFormData.isPrivate}
-                                  onCheckedChange={handlePrivateChange}
-                                  disabled={isCreatingRepo}
-                                />
-                                <Label htmlFor="isPrivate" className="cursor-pointer">Make repository private</Label>
-                              </div>
-                            </div>
-
-                            <DialogFooter>
-                              <Button
-                                variant="outline"
-                                onClick={() => setShowRepoDialog(false)}
-                                disabled={isCreatingRepo}
-                                className="text-white hover:text-white border-white/20 hover:border-white/40 bg-secondary/50 hover:bg-secondary/70"
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                onClick={handleCreateRepo}
-                                disabled={isCreatingRepo}
-                              >
-                                {isCreatingRepo ? (
-                                  <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Creating...
-                                  </>
-                                ) : (
-                                  <>Create Repository</>
-                                )}
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
-
-                      <div className="text-sm text-white/70">
-                        <p>Your repository has been cleaned and is ready for deployment.</p>
-                        <p className="mt-2">You can download the files or create a new GitHub repository with the cleaned code.</p>
-                      </div>
-                    </>
-                  )}
+                  <div className="text-sm text-white/70">
+                    <p>Your repository has been cleaned and is ready for local development.</p>
+                    <p className="mt-2">After downloading, unzip the file and open it in your favorite code editor.</p>
+                  </div>
                 </CardFooter>
               )}
             </Card>
@@ -663,6 +510,107 @@ const WebUI = () => {
               </a>
             </p>
           </div>
+
+          {/* Post-download instructions dialog */}
+          <Dialog open={showInstructionsDialog} onOpenChange={setShowInstructionsDialog}>
+            <DialogContent className="sm:max-w-[600px] bg-secondary/95 backdrop-blur-md border-white/10 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Next Steps</DialogTitle>
+              </DialogHeader>
+
+              <div className="mt-4">
+                <p className="text-white/80 mb-6">
+                  Your project has been cleaned and is ready for local development. Follow these steps to get started:
+                </p>
+
+                <Tabs defaultValue="setup">
+                  <TabsList className="grid grid-cols-3 mb-6">
+                    <TabsTrigger value="setup">Setup</TabsTrigger>
+                    <TabsTrigger value="editors">Code Editors</TabsTrigger>
+                    <TabsTrigger value="ai">AI Assistants</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="setup" className="space-y-4">
+                    <div className="bg-white/5 p-4 rounded-md">
+                      <h3 className="font-medium mb-2">1. Extract the ZIP file</h3>
+                      <p className="text-white/70 text-sm">Unzip the downloaded file to a location on your computer.</p>
+                    </div>
+
+                    <div className="bg-white/5 p-4 rounded-md">
+                      <h3 className="font-medium mb-2">2. Open in your code editor</h3>
+                      <p className="text-white/70 text-sm">Open the extracted folder in your favorite code editor (VS Code, WebStorm, etc.).</p>
+                    </div>
+
+                    <div className="bg-white/5 p-4 rounded-md">
+                      <h3 className="font-medium mb-2">3. Install dependencies</h3>
+                      <p className="text-white/70 text-sm">Open a terminal in your project folder and run:</p>
+                      <pre className="bg-black/30 p-2 rounded mt-2 text-xs overflow-x-auto">npm install</pre>
+                      <p className="text-white/70 text-sm mt-2">or if you use yarn:</p>
+                      <pre className="bg-black/30 p-2 rounded mt-2 text-xs overflow-x-auto">yarn</pre>
+                    </div>
+
+                    <div className="bg-white/5 p-4 rounded-md">
+                      <h3 className="font-medium mb-2">4. Start development server</h3>
+                      <p className="text-white/70 text-sm">Run the development server:</p>
+                      <pre className="bg-black/30 p-2 rounded mt-2 text-xs overflow-x-auto">npm run dev</pre>
+                      <p className="text-white/70 text-sm mt-2">or with yarn:</p>
+                      <pre className="bg-black/30 p-2 rounded mt-2 text-xs overflow-x-auto">yarn dev</pre>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="editors" className="space-y-4">
+                    <p className="text-white/80 mb-2">Here are some recommended code editors for your project:</p>
+
+                    {ideOptions.map((ide) => (
+                      <div key={ide.name} className="bg-white/5 p-4 rounded-md flex items-start">
+                        <div className="flex-1">
+                          <h3 className="font-medium">{ide.name}</h3>
+                          <p className="text-white/70 text-sm mt-1">{ide.description}</p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-4 text-white hover:text-white border-white/20 hover:border-white/40"
+                          onClick={() => openExternalUrl(ide.downloadUrl)}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      </div>
+                    ))}
+                  </TabsContent>
+
+                  <TabsContent value="ai" className="space-y-4">
+                    <p className="text-white/80 mb-2">These AI coding assistants can help you develop your project faster:</p>
+
+                    {aiAssistants.map((assistant) => (
+                      <div key={assistant.name} className="bg-white/5 p-4 rounded-md flex items-start">
+                        <div className="flex-1">
+                          <h3 className="font-medium">{assistant.name}</h3>
+                          <p className="text-white/70 text-sm mt-1">{assistant.description}</p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-4 text-white hover:text-white border-white/20 hover:border-white/40"
+                          onClick={() => openExternalUrl(assistant.url)}
+                        >
+                          <Code className="h-4 w-4 mr-2" />
+                          Learn More
+                        </Button>
+                      </div>
+                    ))}
+                  </TabsContent>
+                </Tabs>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <Button onClick={() => setShowInstructionsDialog(false)}>
+                  Got it!
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     </div>
