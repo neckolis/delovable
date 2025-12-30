@@ -1,87 +1,90 @@
-import { Github } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { StarCounter } from '@/components/StarCounter';
-import { CommandLine } from '@/components/CommandLine';
-import { BrokenHeartLogo } from '@/components/BrokenHeartLogo';
-import { UsageInstructions } from '@/components/UsageInstructions';
+import React from "react";
 
-const Index = () => {
+// Mock components for preview
+const BrokenHeartLogo = () => (
+  <div className="w-12 h-12 flex items-center justify-center">
+    <span className="text-3xl">💔</span>
+  </div>
+);
+
+const StarCounter = () => <span className="text-sm tracking-wide">⭐ 1.2k</span>;
+
+const CommandLine = () => (
+  <div className="bg-black/90 backdrop-blur text-green-400 font-mono p-6 rounded-xl text-left shadow-inner border border-white/10">
+    <div>$ npx delovable my-project</div>
+    <div className="opacity-70">✔ Removing Lovable tracking...</div>
+    <div className="opacity-70">✔ Cleaning dependencies...</div>
+    <div className="opacity-70">✔ Ready to deploy</div>
+  </div>
+);
+
+const UsageInstructions = () => (
+  <div className="mt-20 text-white/80 text-left">
+    <h3 className="text-2xl font-semibold mb-6 tracking-wide">How it works</h3>
+    <ol className="list-decimal ml-6 space-y-3 text-lg">
+      <li>Connect your GitHub repository</li>
+      <li>Run Delovable</li>
+      <li>Deploy anywhere you want</li>
+    </ol>
+  </div>
+);
+
+export default function IndexPreview() {
   return (
-    <div className="min-h-screen bg-secondary">
-      <div className="container mx-auto px-4 py-20">
-        <header className="flex justify-between items-center mb-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white font-[ui-serif]">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 backdrop-blur bg-slate-900/70 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <BrokenHeartLogo />
-            <h1 className="text-white/90 font-mono text-xl">delovable</h1>
+            <h1 className="text-xl tracking-widest uppercase opacity-90">delovable</h1>
           </div>
-          <a
-            href="https://github.com/neckolis/delovable"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-          >
-            <Github className="w-5 h-5" />
+          <div className="flex items-center gap-2 opacity-80 hover:opacity-100 transition">
+            <span>🐙</span>
             <StarCounter />
-          </a>
-        </header>
+          </div>
+        </div>
+      </nav>
 
-        <main className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+      <div className="max-w-6xl mx-auto px-6 py-24">
+        <main className="text-center max-w-4xl mx-auto">
+          <h2 className="text-5xl md:text-6xl font-extrabold mb-8 leading-tight">
             Reclaim your code. Deploy anywhere.
           </h2>
-          <p className="text-lg md:text-xl text-white/80 mb-6">
-            Delovable removes all Lovable tracking, metadata, and dependencies from your projects,
-            giving you back full control of your code and making deployment a breeze.
+          <p className="text-xl md:text-2xl opacity-80 mb-6 leading-relaxed">
+            Delovable removes all Lovable tracking, metadata, and dependencies from your projects.
           </p>
-          <p className="text-md text-primary/90 mb-12">
-            Your idea. Your code. Your future.
-          </p>
+          <p className="text-primary mb-16 tracking-wide text-lg">Your idea. Your code. Your future.</p>
 
-          <div className="mb-12">
+          <div className="mb-16">
             <CommandLine />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left text-white/90 mb-12">
-            <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
-              <h3 className="text-xl font-semibold mb-2 flex items-center">
-                <span className="text-primary mr-2">✓</span> Remove Tracking
-              </h3>
-              <p>Eliminates all Lovable tracking scripts, analytics, and monitoring code that could compromise your privacy</p>
-            </div>
-            <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
-              <h3 className="text-xl font-semibold mb-2 flex items-center">
-                <span className="text-primary mr-2">✓</span> Clean Dependencies
-              </h3>
-              <p>Purges all Lovable-specific dependencies from package.json, giving you a lean, clean codebase that's truly yours</p>
-            </div>
-            <div className="p-6 rounded-lg bg-accent/10 border border-accent/10 hover:border-accent/20 transition-all hover:translate-y-[-2px]">
-              <h3 className="text-xl font-semibold mb-2 flex items-center">
-                <span className="text-primary mr-2">✓</span> Deployment Ready
-              </h3>
-              <p>Automatically configures your project for seamless deployment to Cloudflare Pages, Vercel, or Netlify with zero hassle</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-left mb-16">
+            {[
+              "Remove Tracking",
+              "Clean Dependencies",
+              "Deployment Ready",
+            ].map((title) => (
+              <div
+                key={title}
+                className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-400/40 hover:shadow-xl transition-all hover:-translate-y-1"
+              >
+                <h3 className="text-2xl font-semibold mb-3">✓ {title}</h3>
+                <p className="opacity-80 text-lg">
+                 sorry was in hurry... please add your info here. if you see this line.
+                </p>
+              </div>
+            ))}
           </div>
 
-          <div className="mb-12">
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white transition-all hover:translate-y-[-2px]">
-              <Link to="/web-ui">
-                Try the Web UI Experience
-              </Link>
-            </Button>
-            <p className="text-white/70 text-sm mt-4">
-              No installation required - process GitHub repositories directly in your browser
-            </p>
-            <p className="text-white/60 text-xs mt-2">
-              We do the loving thing and never track or retain any data. All data and logs are deleted within 24 hours.
-            </p>
-          </div>
+          <button className="px-10 py-5 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full font-semibold text-lg shadow-lg hover:shadow-indigo-500/40 hover:scale-105 transition">
+            Try the Web UI Experience
+          </button>
 
           <UsageInstructions />
         </main>
       </div>
     </div>
   );
-};
-
-export default Index;
+}
