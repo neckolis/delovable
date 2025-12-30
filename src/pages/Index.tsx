@@ -70,9 +70,9 @@ export default function IndexPreview() {
                 key={title}
                 className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-400/40 hover:shadow-xl transition-all hover:-translate-y-1"
               >
-                <h3 className="text-2xl font-semibold mb-3">✓ {title}</h3>
+                <h3 className="text-2xl font-semibold mb-3">{title}</h3>
                 <p className="opacity-80 text-lg">
-                 sorry was in hurry... please add your info here. if you see this line.
+                 
                 </p>
               </div>
             ))}
